@@ -2,6 +2,9 @@ import time
 import sys
 import RPi.GPIO as GPIO
 
+
+
+
 #pin number = gpio number! otherwise use BCM
 GPIO.setmode(GPIO.BOARD)
 
@@ -17,68 +20,95 @@ GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_OFF)
 GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_OFF)
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_OFF)
 
-#Enable motor pins (fr, fl, b) GPIO.LOW == 0
-GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)
-GPIO.setup(11, GPIO.OUT, initial=GPIO.LOW)
-GPIO.setup(13, GPIO.OUT, initial=GPIO.LOW)
 
-#motor direction pins (PWM [full_cw ... off ... full_ccw] [0 ... 50 ... 100]
-GPIO.setup(15, GPIO.OUT)
-GPIO.setup(16, GPIO.OUT)
-GPIO.setup(18, GPIO.OUT)
-
-#todo: put in motor class /drive class
-#setup PWM 50Hz?
-motor_fl = GPIO.PWM(15, 50)
-motor_fr = GPIO.PWM(16, 50)
-motor_b = GPIO.PWM(18, 50)
-
-GPIO.output(7, GPIO.HIGH)
-GPIO.output(11, GPIO.HIGH)
-GPIO.output(13, GPIO.HIGH)
-
-motor_fl.start(35)
-motor_fr.start(35)
-motor_b.start(35)
 
 
 
 #Encoder class
 class Encoder:
-    def __init__(self, encGPIO):
+    def __init__(self, encoderGPIO):
         #counter variable
-        self.enc_count = 0
+        self.encoder_count = 0
         #encoder GPIO (maybe we don't even need it)
-        self.encGPIO = encGPIO
+        self.encoderGPIO = encoderGPIO
 
-        #which direction (1=cw/2=ccw)
+        #which direction (-1=cw/1=ccw)
         self.direction = 1
 
     def count(self):
-        self.enc_count += self.direction
+        self.encoder_count += self.direction
         print "pin: " + str(self.encGPIO) + " count: " + str(self.enc_count)
 
-    def change_dir(self, direction):
-        if direction == "cw":
-            self.direction = 1
-        elif direction == "ccw":
-            self.direction = -1
+    def change_direction(self, direction):
+            self.direction = direction
+
+#Motor class
+class Motor:
+    def __init__(self, motorEnableGPIO, motorSpeedGPIO, encoderGPIO):
+        #Enable motor pin
+        self.motorEnabledGPIO = motorEnableGPIO
+        self.motorSpeedGPIO = motorSpeedGPIO
+        self.encoderGPIO = encoderGPIO
+        
+        self.encoder = Encoder(self.encoderGPIO)
+        
+        
+        GPIO.setup(motorEnableGPIO, GPIO.OUT, initial=GPIO.LOW)
+
+        #motor speed pins (PWM [full_cw ... off ... full_ccw] [0 ... 50 ... 100]
+        GPIO.setup(motorSpeedGPIO, GPIO.OUT)
+
+        #setup PWM 50Hz?
+        self.motorSpeedPWM = GPIO.PWM(motorSpeedGPIO, 50)
+
+        #counter variable
+        self.speed = 0
+        self.enabled = False
+
+        #which direction (1=cw/2=ccw)
+        self.direction = 1
+    def __exit__(self, type, value, traceback):
+        self.motorSpeedPWM.stop()
+
+    def set_speed(self, speed):
+        #motor direction pins (PWM [full_cw ... off ... full_ccw] [0 ... [35-65] ... 100]
+        if speed > -15 and speed < 15:
+            self.set_enabled(False)
+            self.motorSpeedPWM.stop()
+            return
         else:
-            print "what direction is that supposed to be?"
+            self.set_enabled(True)
+
+        #adjust for [0-100] duty cycle
+        self.speed = speed + 50
+
+        self.motorSpeedPWM.start(self.speed)
+     
+        print "Speed: " + str(self.speed)
+
+    def set_enabled(self, enable):
+        if enable == True:
+            GPIO.output(self.motorEnabledGPIO, GPIO.HIGH)
+        else:
+            GPIO.output(self.motorEnabledGPIO, GPIO.LOW)
 
 
-# instantiate the three encoder objects
-encoder_fr = Encoder(19)
-encoder_fl = Encoder(21)
-encoder_b = Encoder(23)
+motor_fl = Motor(7, 15, 19)
+motor_fl.set_speed(15)
 
-encoder_fr.change_dir("ccw")
+motor_fr = Motor(11, 16, 21)
+motor_fr.set_speed(15)
+
+motor_b = Motor(13, 18, 23)
+motor_b.set_speed(15)
+
+
 
 #encoder gpio lookup table
-encoder_count = {19: encoder_fr.count,
-           21: encoder_fl.count,
-           23: encoder_b.count,
-}
+#encoder_count = {19: encoder_fr.count,
+ #          21: encoder_fl.count,
+  #         23: encoder_b.count,
+#}
 
 #the callback function for the encoders
 def encoder_callback(enc_num):
@@ -91,9 +121,9 @@ def encoder_callback(enc_num):
 
 
 #append the encoder event to it's callback function
-GPIO.add_event_detect(19, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
-GPIO.add_event_detect(21, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
-GPIO.add_event_detect(23, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
+#GPIO.add_event_detect(19, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
+#GPIO.add_event_detect(21, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
+#GPIO.add_event_detect(23, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
 
 
 
@@ -102,15 +132,13 @@ GPIO.add_event_detect(23, GPIO.BOTH, callback=encoder_callback, bouncetime=2)
 try:
     print "Waiting for rising edge on port 24"
     while 1:
-      time.sleep(100)
+      time.sleep(10)
       print '.'
 
 
 
 except KeyboardInterrupt:
     GPIO.cleanup()       # clean up GPIO on CTRL+C exit
-    motor_fr.stop()
-    motor_fb.stop()
-    motor_b.stop()
+
 
 GPIO.cleanup()           # clean up GPIO on normal exit
