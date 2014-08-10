@@ -25,7 +25,7 @@ function testWebSocket()
 function onOpen(evt)
 {
     writeToScreen("CONNECTED");
-    doSend(JSON.stringify(query));
+    
 }
 
 function onClose(evt)
@@ -38,7 +38,7 @@ function onMessage(evt)
     var receivedData = JSON.parse(evt.data);
     if(receivedData["response"]==true)
         writeToScreen('<span style="color: blue;">Command was accepted</span>');
-    websocket.close();
+    //websocket.close();
 }
 
 function onError(evt)
@@ -48,7 +48,6 @@ function onError(evt)
 
 function doSend(message)
 {
-    writeToScreen("SENT: " + message); 
     websocket.send(message);
 }
 
