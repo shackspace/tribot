@@ -86,9 +86,7 @@ class Motor:
         #adjust for [0-100] duty cycle
         self.motorSpeedPWM.start(speed + 50)
 
-
-
-        print "Speed: " + str(speed)
+        #print "Speed: " + str(speed)
 
     def set_enabled(self, enable):
         if enable == True:
@@ -136,48 +134,41 @@ class MotionController():
             self.motor_fl.set_speed(-self.speed)
             self.motor_fr.set_speed(0)
             self.motor_b.set_speed(self.speed)
- #       else:
-  #          self.motor_fl.set_speed(0)
-   #         self.motor_fr.set_speed(0)
-    #        self.motor_b.set_speed(0)
+        else:
+            self.motor_fl.set_speed(0)
+            self.motor_fr.set_speed(0)
+            self.motor_b.set_speed(0)
 
+    def rotate(self, direction, speed):
+        if direction == 1 or direction == "ccw":
+            self.motor_fr.set_speed(speed)
+            self.motor_fl.set_speed(speed)
+            self.motor_b.set_speed(speed)
+        elif direction == -1 or direction == "cw":
+            self.motor_fr.set_speed(-speed)
+            self.motor_fl.set_speed(-speed)
+            self.motor_b.set_speed(-speed)
+        else:
+            self.motor_fr.set_speed(0)
+            self.motor_fr.set_speed(0)
+            self.motor_b.set_speed(0)
 
 mc = MotionController()
-
-mc.move(0, 25)
-
-time.sleep(3)
-
-mc.move(60, 25)
-
-time.sleep(3)
-
-mc.move(120, 25)
-
-time.sleep(3)
-
-mc.move(180, 25)
-
-time.sleep(3)
-
-mc.move(240, 25)
-
-time.sleep(3)
-
-mc.move(300, 25)
-
-
-
 
 # 'bouncetime=300' includes the bounce control written into interrupts2a.py
 
 try:
-    print "Waiting for rising edge on port 24"
     while 1:
-      time.sleep(1)
-      print '.'
+        print '.'
 
+        for i in range (-1, 2, 2):
+            mc.rotate(i,25)
+            time.sleep(3)
 
+        for i in range(0,301,60):
+            mc.move(i, 25)
+            time.sleep(3)
+        time.sleep(10)
 
 except KeyboardInterrupt:
     GPIO.cleanup()       # clean up GPIO on CTRL+C exit
