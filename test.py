@@ -14,13 +14,25 @@ class ControlWS:
             if message is None:
                 break
             try:
-                json.loads(message)
+                receivedData = json.loads(message)
+                receivedData["response"]=False
+                if(self.callback != None):
+#                    receivedData["response"]=self.callback(receivedData)
+                    self.callback(receivedData)
+                yield from websocket.send(json.dumps(receivedData))
             except ValueError:
-                yield from websocket.send("That was no JSON")
-        
+                yield from websocket.send("{} was no JSON".format(message))
+    callback = None
+
+
+def callback(receivedData):
+    print(json.dumps(receivedData))
+    receivedData["response"]=True
+    return True
+
 try:
     controlws = ControlWS()
-
+    controlws.callback = callback
     start_server = websockets.serve(controlws.handler, 'localhost', 8765)
 
     asyncio.get_event_loop().run_until_complete(start_server)
@@ -28,3 +40,6 @@ try:
 
 except KeyboardInterrupt:
     print("Goodbye")
+
+
+
