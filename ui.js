@@ -55,10 +55,10 @@ function uiInit()
                 query["direction"] -= 1;
                 break;
             case 32://Space
-                query["speed"]=0;
-                query["rotation"]=0;
-                query["direction"]=0;
-                query["enable"]=0;
+                //query["speed"]=0;
+                //query["rotation"]=0;
+                //query["direction"]=0;
+                query["enable"]=false;
                 break;
             case 13://Enter
                 query["enable"]=true;  
