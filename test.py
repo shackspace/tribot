@@ -5,7 +5,6 @@ import websockets
 import json
 
 
-
 class ControlWS:
     @asyncio.coroutine
     def handler(self, websocket, path):
@@ -15,8 +14,8 @@ class ControlWS:
                 break
             try:
                 receivedData = json.loads(message)
-                receivedData["response"]=False
-                if(self.callback != None):
+                receivedData["response"] = False
+                if(self.callback is not None):
 #                    receivedData["response"]=self.callback(receivedData)
                     self.callback(receivedData)
                 yield from websocket.send(json.dumps(receivedData))
@@ -27,7 +26,7 @@ class ControlWS:
 
 def callback(receivedData):
     print(json.dumps(receivedData))
-    receivedData["response"]=True
+    receivedData["response"] = True
     return True
 
 try:
@@ -40,6 +39,3 @@ try:
 
 except KeyboardInterrupt:
     print("Goodbye")
-
-
-
