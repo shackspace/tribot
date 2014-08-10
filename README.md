@@ -8,3 +8,9 @@ Description
 ===========
 
 TODO
+
+Lookup
+======
+http://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.130/Arbeitsgruppen/Robotics/Robotik/Robotik-Skript_07-08.pdf
+
+
