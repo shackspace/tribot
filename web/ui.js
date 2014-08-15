@@ -80,5 +80,6 @@ function uiInit()
             "Roatation" + query["rotation"] +
             "Direction" + query["direction"] +
             "Enable" +  query["enable"]);
+        doSend(JSON.stringify(query));
     })
 }
