@@ -9,7 +9,7 @@ class Kinematic:
         self.xSpeed = 0
         self.ySpeed = 0
         self.thetaSpeed = 0
-        self.distanceToWheel = 0.08 #m
+        self.distanceToWheel = 0.88888888 #m
         self.sinPiThird = math.sin(math.pi / 3)
         self.cosPiThird = math.cos(math.pi/ 3)
         self.w1 = 0

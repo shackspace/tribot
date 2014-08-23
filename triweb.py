@@ -29,7 +29,7 @@ class ControlWS:
 def startup(callback):
     controlws = ControlWS()
     controlws.callback = callback
-    start_server = websockets.serve(controlws.handler, 'lan.tribot.shack', 1337)
+    start_server = websockets.serve(controlws.handler, 'tribot.shack', 1337)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
