@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import asyncio
 import websockets
 import json
@@ -15,19 +16,15 @@ class ControlWS:
             try:
                 receivedData = json.loads(message)
                 receivedData["response"] = False
-                if(self.callback is not None):
-#                    receivedData["response"]=self.callback(receivedData)
-                    self.callback(receivedData)
+                self.callback(receivedData)
                 yield from websocket.send(json.dumps(receivedData))
             except ValueError:
                 yield from websocket.send("{} was no JSON".format(message))
-    callback = None
 
-
-def callback(receivedData):
-    print(json.dumps(receivedData))
-    receivedData["response"] = True
-    return True
+    def callback(self, receivedData):
+        print(json.dumps(receivedData))
+        receivedData["response"] = True
+        return True
 
 def startup(callback):
     controlws = ControlWS()

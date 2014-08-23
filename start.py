@@ -252,6 +252,10 @@ class MotionController():
             self.motor_fr.set_speed(0)
             self.motor_b.set_speed(0)
 
+    def setSpeeds(fr, fl, b):
+        self.motor_fr.set_speed(fr)
+        self.motor_fl.set_speed(fl)
+        self.motor_b.set_speed(b)
 #pin number = gpio number! otherwise use BCM
 GPIO.setmode(GPIO.BOARD)
 RPIO.setmode(RPIO.BOARD)
