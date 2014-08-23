@@ -23,41 +23,51 @@ function uiInit()
         {
             dir = 2 * 3.1415 - dir;
         }
-        dir = parseInt(dir * 360 / 2 / 3.1415);
         len = parseInt(len / 2);
         if (len > 50)
         {
             len = 50;
         }
-
-        display.html("Direction:" + dir + " Velocity:"+ len+ "<br/> x" + vecX + " y:" + vecY )
+        len = len - 5;
+        if( len < 0)
+        {
+            len = 0
+        }
+        query["direction"] = dir;
+        query["speed"] = len;
+        display.html(
+            "Enable" +  query["enable"] +
+            "Speed:" + query["speed"] +
+            "Roatation" + query["rotation"] +
+            "Direction" + query["direction"]); 
+        doSend(JSON.stringify(query));
     });
     $(document).keydown(function(eventObject)
     {
         switch (eventObject.keyCode)
         {
             case 81://Q
-                query["rotation"] += 1;
+                query["rotation"] = -1;
                 break;
             case 87://W
-                query["speed"] += 1;
+                query["rotation"] *= 2;
                 break;
             case 69://E
-                query["rotation"] -= 1;
+                query["rotation"] = 1;
                 break;
-            case 65://A
-                query["direction"] += 1;
-                break;
-            case 83://S
-                query["speed"] -= 1;
-                break;
-            case 68://D
-                query["direction"] -= 1;
-                break;
+            //case 65://A
+            //    query["direction"] += 1;
+            //    break;
+            //case 83://S
+            //    query["speed"] -= 1;
+            //    break;
+            //case 68://D
+            //    query["direction"] -= 1;
+            //    break;
             case 32://Space
-                //query["speed"]=0;
-                //query["rotation"]=0;
-                //query["direction"]=0;
+                query["speed"]=0;
+                query["rotation"]=0;
+                query["direction"]=0;
                 query["enable"]=false;
                 break;
             case 13://Enter
@@ -76,10 +86,10 @@ function uiInit()
         if(query["direction"] < -179)
             query["direction"] = 180;
         display.html(
+            "Enable" +  query["enable"] +
             "Speed:" + query["speed"] +
             "Roatation" + query["rotation"] +
-            "Direction" + query["direction"] +
-            "Enable" +  query["enable"]);
+            "Direction" + query["direction"]);
         doSend(JSON.stringify(query));
     })
 }
