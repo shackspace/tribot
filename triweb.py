@@ -26,12 +26,16 @@ class ControlWS:
         receivedData["response"] = True
         return True
 
-try:
+def startup(callback):
     controlws = ControlWS()
-    start_server = websockets.serve(controlws.handler, 'localhost', 1337)
+    controlws.callback = callback
+    start_server = websockets.serve(controlws.handler, 'tribot.shack', 1337)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
 
-except KeyboardInterrupt:
-    print("Goodbye")
+if __name__ == "__main__":
+    try:
+       startup(callback) 
+    except KeyboardInterrupt:
+       print("Goodbye")
