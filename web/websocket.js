@@ -1,4 +1,4 @@
-var wsUri = "ws://localhost:8765/";
+var wsUri = "ws://tribot.shack:1337/";
 var output;
 var query;
 function wsInit()
@@ -10,7 +10,7 @@ function wsInit()
 
 function initQuery()
 {
-    query = {"direction":0, "speed": 10, "rotation" : 0, "enable": 1}
+    query = {"direction":0, "speed": 0, "rotation" : 0, "enable": false}
 }
 
 function testWebSocket()
@@ -38,7 +38,6 @@ function onMessage(evt)
     var receivedData = JSON.parse(evt.data);
     if(receivedData["response"]==true)
         writeToScreen('<span style="color: blue;">Command was accepted</span>');
-    //websocket.close();
 }
 
 function onError(evt)
@@ -56,5 +55,5 @@ function writeToScreen(message)
     var pre = document.createElement("p");
     pre.style.wordWrap = "break-word";
     pre.innerHTML = message;
-    output.appendChild(pre);
+    $("#output").html(pre);
 }
