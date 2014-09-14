@@ -7,6 +7,11 @@ import json
 
 
 class ControlWS:
+    def __init__(self, callback, event_loop):
+        if callback != None:
+            self.callback = callback
+        self.loop = event_loop
+        self.start_server = websockets.serve(self.handler, '*', 1337)
     @asyncio.coroutine
     def handler(self, websocket, path):
         while True:
@@ -15,8 +20,8 @@ class ControlWS:
                 break
             try:
                 receivedData = json.loads(message)
-                receivedData["response"] = False
-                self.callback(receivedData)
+                self.loop.call_soon_threadsafe(self.callback, receivedData)
+                #self.callback(receivedData)
                 yield from websocket.send(json.dumps(receivedData))
             except ValueError:
                 yield from websocket.send("{} was no JSON".format(message))
@@ -25,17 +30,16 @@ class ControlWS:
         print(json.dumps(receivedData))
         receivedData["response"] = True
         return True
+    def start(self):
+        self.loop.run_until_complete(self.start_server)
+        self.loop.run_forever()
 
 def startup(callback):
-    controlws = ControlWS()
-    controlws.callback = callback
-    start_server = websockets.serve(controlws.handler, 'tribot.shack', 1337)
-
-    asyncio.get_event_loop().run_until_complete(start_server)
-    asyncio.get_event_loop().run_forever()
+    controlws = ControlWS( callback, asyncio.get_event_loop())
+    controlws.start()
 
 if __name__ == "__main__":
     try:
-       startup(callback) 
+        startup(None) 
     except KeyboardInterrupt:
        print("Goodbye")
